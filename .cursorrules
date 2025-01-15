@@ -1,0 +1,6 @@
+Indiegrid is a community resource sharing platform for the indie hacker community. 
+The goal is to proviide affordable cloud services for indie hackers.
+
+It will follow an AWS like approach where I build a cloud provider and then provide a shared resource to the community. That means shared database servers, shared backup servers, shared computing power, etc.
+
+Everything would be VPS oriented and powered by containerized services.
