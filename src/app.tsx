@@ -1,4 +1,19 @@
+import { joinWaitlist } from "./api/waitlist";
+import { Toast } from "./components/toast";
+import { useState } from "react";
+
 const Hero = () => {
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success"
+  });
+
   return (
     <section aria-label="Hero" className="hero min-h-[80vh] bg-gradient-to-br from-primary/10 via-base-300 to-secondary/10 relative overflow-hidden">
       <div className="absolute inset-0 opacity-10">
@@ -11,14 +26,61 @@ const Hero = () => {
         </div>
       </div>
       <div className="hero-content text-center relative z-10">
-        <div className="max-w-lg space-y-8 px-4">
-          <h1 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent !leading-[100px]">theindiegrid</h1>
+        <div className="max-w-lg space-y-4 px-4">
+          <h1 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent !leading-[42px] lg:!leading-[82px]">theindiegrid</h1>
           <h2 className="text-lg md:text-xl leading-relaxed text-base-content/80">Professional cloud infrastructure for indie hackers, at community prices</h2>
-          <button className="btn btn-primary w-full md:w-auto btn-lg mt-8 shadow-[0_0_15px_rgba(var(--p),0.3)] hover:shadow-[0_0_25px_rgba(var(--p),0.4)] transition-all duration-300 hover:-translate-y-1" aria-label="Join Waitlist">
-            Join Waitlist
-          </button>
+          <div className="flex flex-col gap-4 pt-4">
+            <input 
+              type="email"
+              id="email-input"
+              placeholder="Enter your email"
+              className="input input-bordered w-full focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-center"
+              onChange={(e) => {
+                const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value);
+                setButtonDisabled(!isValid);
+              }}
+            />
+            <button 
+              id="waitlist-btn"
+              className="btn btn-primary w-full md:w-auto btn-lg shadow-[0_0_15px_rgba(var(--p),0.3)] hover:shadow-[0_0_25px_rgba(var(--p),0.4)] transition-all duration-300 hover:-translate-y-1 disabled:opacity-80 disabled:shadow-none disabled:hover:shadow-none"
+              aria-label="Join Waitlist"
+              disabled={buttonDisabled}
+              onClick={async () => {
+                const emailInput = document.querySelector('#email-input') as HTMLInputElement;
+                if (emailInput?.value) {
+                  try {
+                    await joinWaitlist(emailInput.value);
+                    setToast({
+                      show: true,
+                      type: "success",
+                      message: "Successfully joined waitlist!"
+                    });
+                  } catch (error) {
+                    setToast({
+                      show: true,
+                      type: "error", 
+                      message: "Error joining waitlist. Please try again."
+                    });
+                  }
+                } else {
+                  setToast({
+                    show: true,
+                    type: "error", 
+                    message: "You must provide an email address"
+                  });
+                }
+              }}
+            >
+              Join Waitlist
+            </button>
+          </div>
         </div>
       </div>
+      {toast.show && (
+        <Toast type={toast.type} position="end" vertical="bottom">
+          {toast.message}
+        </Toast>
+      )}
     </section>
   )
 }
